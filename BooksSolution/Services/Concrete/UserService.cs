@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Data;
-using Data.Repository.Concrete;
-using Data.Repository.Contract;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Models.Dto;
 using Services.Contract;
@@ -14,31 +10,33 @@ namespace Services.Concrete
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository userRepository;
-        private readonly IConfiguration configuration;
+        private readonly UserManager<User> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public UserService(IUserRepository userRepository, IConfiguration configuration)
+        public UserService(UserManager<User> userManager, IConfiguration configuration)
         {
-            this.userRepository = userRepository;
-            this.configuration = configuration;
+            _userManager = userManager;
+            _configuration = configuration;
         }
-
-      
 
         public async Task<(bool IsSuccess, string? ErrorMessage)> Register(RegisterDto dto)
         {
-            var existingUser = await userRepository.GetUserByUsername(dto.UserName);
+            var existingUser = await _userManager.FindByNameAsync(dto.UserName);
             if (existingUser != null)
                 return (false, "Username already exists.");
 
             var user = new User
             {
                 UserName = dto.UserName,
-                Email = dto.Email
+                Email = dto.Email,
             };
 
-            var success = await userRepository.CreateUser(user, dto.Password);
-            return success ? (true, null) : (false, "Registration failed.");
+            var result = await _userManager.CreateAsync(user, dto.Password);
+            if (result.Succeeded)
+                return (true, null);
+
+            var errorMessages = string.Join("; ", result.Errors.Select(e => e.Description));
+            return (false, errorMessages);
         }
     }
 }

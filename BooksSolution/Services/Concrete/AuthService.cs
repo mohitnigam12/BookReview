@@ -9,6 +9,7 @@ using Azure.Core;
 using Data;
 using Data.Repository.Concrete;
 using Data.Repository.Contract;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -38,7 +39,9 @@ namespace Services.Concrete
             var isPasswordValid = await userRepository.ValidateUserPassword(user, dto.Password);
             if (!isPasswordValid) return null;
 
-            return GenerateJwtToken(user);
+            var token = GenerateJwtToken(user);
+           
+            return token;
         }
 
 
@@ -53,7 +56,8 @@ namespace Services.Concrete
                 Subject = new ClaimsIdentity(new[]
                 {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName!)
+            new Claim(ClaimTypes.Name, user.UserName!),
+            new Claim(ClaimTypes.Email, user.Email),
         }),
                 Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(configuration["Jwt:TokenExpiryInMinutes"])),
                 SigningCredentials = credentials,

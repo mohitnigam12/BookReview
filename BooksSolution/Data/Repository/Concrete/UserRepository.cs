@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Data.Repository.Contract;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repository.Concrete
@@ -15,26 +10,30 @@ namespace Data.Repository.Concrete
         private readonly TestDbContext testDbContext;
         private readonly IPasswordHasher<User> passwordHasher;
 
-
         public UserRepository(TestDbContext testDbContext, IPasswordHasher<User> passwordHasher)
         {
             this.testDbContext = testDbContext;
             this.passwordHasher = passwordHasher;
         }
 
-        public async Task<bool> CreateUser(User user ,string password)
+        public async Task<bool> CreateUser(User user, string password)
         {
-            user.PasswordHash = passwordHasher.HashPassword(user,password);
-            testDbContext.Users.Add(user);
+            // Hash the password
+            user.PasswordHash = passwordHasher.HashPassword(user, password);
 
-            var res = testDbContext.SaveChanges();
+            // Manually normalize email and username
+            user.NormalizedEmail = user.Email?.ToUpperInvariant();
+            user.NormalizedUserName = user.UserName?.ToUpperInvariant();
+
+            testDbContext.Users.Add(user);
+            var res = await testDbContext.SaveChangesAsync();
 
             return res > 0;
         }
 
-        public async Task<bool> ValidateUserPassword(User user , string password)
+        public async Task<bool> ValidateUserPassword(User user, string password)
         {
-            var res = passwordHasher.VerifyHashedPassword(user , user.PasswordHash!, password);
+            var res = passwordHasher.VerifyHashedPassword(user, user.PasswordHash!, password);
             return res == PasswordVerificationResult.Success;
         }
 
@@ -47,7 +46,5 @@ namespace Data.Repository.Concrete
         {
             return await testDbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
-
-        
     }
 }

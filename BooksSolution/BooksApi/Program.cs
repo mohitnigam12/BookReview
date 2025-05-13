@@ -1,4 +1,5 @@
 
+using System.Configuration;
 using System.Text;
 using Data;
 using Data.Repository.Concrete;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MySqlX.XDevAPI;
 using Services.Concrete;
 using Services.Contract;
 using Services.Mapper;
@@ -61,6 +63,21 @@ namespace BooksApi
     });
             builder.Services.AddAuthorization();
 
+            // Session configuration
+            //builder.Services.AddDistributedMemoryCache();
+            //builder.Services.AddSession(options =>
+            //{
+            //    options.IdleTimeout = TimeSpan.FromMinutes(30);
+            //    options.Cookie.HttpOnly = true;
+            //    options.Cookie.IsEssential = true;
+            //});
+
+            // Controllers and JSON options
+            builder.Services.AddControllers()
+                .AddJsonOptions(x =>
+                    x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+                );
+
             builder.Services.AddSwaggerGen(option =>
             {
                 option.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Your API Name", Version = "v1" });
@@ -102,7 +119,7 @@ namespace BooksApi
             builder.Services.AddScoped<IBookService, BookService>();
             builder.Services.AddScoped<IBookRepository, BookRepository>();
 
-
+            //builder.Services.AddSession();
 
 
             // Add services to the container.
@@ -128,7 +145,7 @@ namespace BooksApi
 
 
             app.UseHttpsRedirection();
-
+           // app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
 

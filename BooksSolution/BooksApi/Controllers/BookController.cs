@@ -1,5 +1,8 @@
-﻿using System.Security.Claims;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Models.Dto;
 using Services.Concrete;
@@ -15,10 +18,12 @@ namespace BooksApi.Controllers
     {
 
         private readonly IBookService bookService;
+        private readonly UserManager<User> _userManager;
 
-        public BookController(IBookService bookService)
+        public BookController(IBookService bookService, UserManager<User> userManager)
         {
             this.bookService = bookService;
+            _userManager = userManager;
         }
 
         [HttpGet("get-all")]
@@ -42,17 +47,40 @@ namespace BooksApi.Controllers
 
       
         [HttpPost]
+        //[AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] CreateBookDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            Console.WriteLine(userIdClaim);
+            //var token = HttpContext.Session.GetString("AuthToken");
+            //if (string.IsNullOrEmpty(token))
+            //    return Unauthorized("Token not found in session");
+
+            //var handler = new JwtSecurityTokenHandler();
+            //var jwtToken = handler.ReadJwtToken(token);
+
+            var email = User.FindFirstValue(ClaimTypes.Email);
+
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized("Email claim not found in token");
+
+            //var user = await _userManager.FindByEmailAsync(email);
+
+            Console.WriteLine($"Extracted email: '{email}'");
+            var users = _userManager.Users.ToList();
+            foreach (var u in users)
+            {
+                Console.WriteLine($"DB Email: '{u.Email}'");
+            }
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized("User not found");
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userIdClaim == null)
             {
-                return BadRequest("User ID not found in claims.");
+                return BadRequest("User ID not found in token claims.");
             }
 
-            string userId = userIdClaim.Value;
+            string userId = userIdClaim;
             var book = await bookService.AddBook(dto, userId);
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
         }

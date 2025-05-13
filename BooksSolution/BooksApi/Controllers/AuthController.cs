@@ -23,6 +23,8 @@ namespace BooksApi.Controllers
             if (token == null)
                 return Unauthorized(new { message = "Invalid credentials." });
 
+            //HttpContext.Session.SetString("AuthToken", token);
+
             return Ok(new { token });
         }
 
