@@ -10,6 +10,7 @@ using Data;
 using Data.Repository.Concrete;
 using Data.Repository.Contract;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -31,9 +32,10 @@ namespace Services.Concrete
             this.configuration = configuration;
         }
 
+        
         public async Task<string?> Login(LoginDto dto)
         {
-            var user = await userRepository.GetUserByUsername(dto.UserName); //Error is in this line 
+            var user = await userRepository.GetUserByUsername(dto.UserName); 
             if (user == null) return null;
 
             var isPasswordValid = await userRepository.ValidateUserPassword(user, dto.Password);
@@ -43,6 +45,9 @@ namespace Services.Concrete
            
             return token;
         }
+
+        
+   
 
 
         private string GenerateJwtToken(User user)
@@ -58,6 +63,7 @@ namespace Services.Concrete
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Name, user.UserName!),
             new Claim(ClaimTypes.Email, user.Email),
+
         }),
                 Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(configuration["Jwt:TokenExpiryInMinutes"])),
                 SigningCredentials = credentials,

@@ -1,6 +1,6 @@
 
-using System.Configuration;
-using System.Text;
+   // Program.cs
+   using System.Text;
 using Data;
 using Data.Repository.Concrete;
 using Data.Repository.Contract;
@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using MySqlX.XDevAPI;
+using Microsoft.OpenApi.Models;
 using Services.Concrete;
 using Services.Contract;
 using Services.Mapper;
@@ -21,95 +21,102 @@ namespace BooksApi
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Configure CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularApp", policy =>
+                {
+                    policy.AllowAnyOrigin() // Temporary for debugging
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
+            // Database Configuration
             builder.Services.AddDbContext<TestDbContext>(options =>
-             options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
 
-            //      builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            //.AddJwtBearer(option =>
-            //{
-            //    option.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateIssuerSigningKey = true, 
-            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
+            // Identity Configuration
+            builder.Services.AddIdentity<User, IdentityRole>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            })
+                .AddEntityFrameworkStores<TestDbContext>()
+                .AddDefaultTokenProviders();
 
-            //        ValidateIssuer = true,
-            //        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            // JWT Authentication Configuration
+            var jwtSettings = builder.Configuration.GetSection("Jwt");
+            var secretKey = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!);
 
-            //        ValidateAudience = true,
-            //        ValidAudience = builder.Configuration["Jwt:Audience"],
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(secretKey),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                };
+            });
 
-            //        ValidateLifetime = true, 
-            //        ClockSkew = TimeSpan.Zero 
-            //    };
-            //});
-
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
-
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-    });
             builder.Services.AddAuthorization();
 
-            // Session configuration
-            //builder.Services.AddDistributedMemoryCache();
-            //builder.Services.AddSession(options =>
-            //{
-            //    options.IdleTimeout = TimeSpan.FromMinutes(30);
-            //    options.Cookie.HttpOnly = true;
-            //    options.Cookie.IsEssential = true;
-            //});
-
-            // Controllers and JSON options
+            // Controller setup
             builder.Services.AddControllers()
                 .AddJsonOptions(x =>
                     x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
                 );
 
-            builder.Services.AddSwaggerGen(option =>
+            // AutoMapper
+            builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
+            // Swagger Setup with JWT
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
             {
-                option.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Your API Name", Version = "v1" });
-                option.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Description = "Please enter a valid JWT token",
-                    Name = "Authorization",
-                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-                    BearerFormat = "JWT",
-                    Scheme = "Bearer"
+                    Title = "JWTToken_Auth_API",
+                    Version = "v1"
                 });
-                option.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "JWT Authorization header using the Bearer scheme."
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                   {
+                       {
+                           new OpenApiSecurityScheme
+                           {
+                               Reference = new OpenApiReference
+                               {
+                                   Type = ReferenceType.SecurityScheme,
+                                   Id = "Bearer"
+                               }
+                           },
+                           new string[] {}
+                       }
+                   });
             });
 
-            builder.Services.AddIdentity<User, IdentityRole>()
-                   .AddEntityFrameworkStores<TestDbContext>()
-                   .AddDefaultTokenProviders();
-
+            // Repositories & Services
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -119,45 +126,31 @@ namespace BooksApi
             builder.Services.AddScoped<IBookService, BookService>();
             builder.Services.AddScoped<IBookRepository, BookRepository>();
 
-            //builder.Services.AddSession();
-
-
-            // Add services to the container.
-
-            builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddLogging();
-         
+            // Add logging
+            builder.Services.AddLogging(logging =>
+            {
+                logging.AddConsole();
+                logging.AddDebug();
+            });
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.i
+            // Middleware Pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            app.UseRouting();
-            
 
-
-            app.UseHttpsRedirection();
-           // app.UseSession();
+            // Comment out HTTPS redirection for debugging
+            // app.UseHttpsRedirection();
+            app.UseCors("AllowAngularApp");
             app.UseAuthentication();
             app.UseAuthorization();
-
-            //app.UseAuthorization();
-
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();  
-            });
+            app.MapControllers();
 
             app.Run();
         }
     }
 }
+   

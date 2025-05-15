@@ -47,23 +47,20 @@ namespace BooksApi.Controllers
 
       
         [HttpPost]
-        //[AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] CreateBookDto dto)
         {
-            //var token = HttpContext.Session.GetString("AuthToken");
-            //if (string.IsNullOrEmpty(token))
-            //    return Unauthorized("Token not found in session");
 
-            //var handler = new JwtSecurityTokenHandler();
-            //var jwtToken = handler.ReadJwtToken(token);
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
 
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = jwtToken.Claims.FirstOrDefault(c =>
+                  c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email || c.Type == "email")?.Value;
 
             if (string.IsNullOrEmpty(email))
+            {
                 return Unauthorized("Email claim not found in token");
-
-            //var user = await _userManager.FindByEmailAsync(email);
-
+            }
             Console.WriteLine($"Extracted email: '{email}'");
             var users = _userManager.Users.ToList();
             foreach (var u in users)
@@ -72,15 +69,11 @@ namespace BooksApi.Controllers
             }
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                return Unauthorized("User not found");
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null)
             {
-                return BadRequest("User ID not found in token claims.");
+                return Unauthorized("User not found");
             }
-
-            string userId = userIdClaim;
+            var userId = jwtToken.Claims.FirstOrDefault(c =>
+                         c.Type == ClaimTypes.NameIdentifier || c.Type == "nameid")?.Value;
             var book = await bookService.AddBook(dto, userId);
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
         }

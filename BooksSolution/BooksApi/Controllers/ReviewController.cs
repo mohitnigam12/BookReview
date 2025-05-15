@@ -16,7 +16,7 @@ namespace BooksApi.Controllers
 
         public ReviewController(IReviewService reviewService)
         {
-            reviewService = reviewService;
+            this.reviewService = reviewService;
         }
 
         [HttpGet]
@@ -32,7 +32,7 @@ namespace BooksApi.Controllers
         public async Task<IActionResult> AddReview(int bookId, [FromBody] CreateReviewDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            await reviewService.AddReview(bookId, dto, userId);
+            await reviewService.AddReview(bookId, dto, userId); //this line is giving error
             return Ok(new { message = "Review added." });
         }
     }

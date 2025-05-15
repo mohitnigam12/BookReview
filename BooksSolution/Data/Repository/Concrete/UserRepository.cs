@@ -37,6 +37,9 @@ namespace Data.Repository.Concrete
             return res == PasswordVerificationResult.Success;
         }
 
+      
+
+
         public async Task<User> GetUserByUsername(string username)
         {
             return await testDbContext.Users.FirstOrDefaultAsync(u => u.UserName == username);
