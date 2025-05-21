@@ -1,0 +1,19 @@
+<div class="form-container">
+  <h2>📚 Add a New Book</h2>
+  <form [formGroup]="bookForm" (ngSubmit)="onSubmit()">
+    <input type="text" formControlName="title" placeholder="Enter book title" required />
+
+    <input type="text" formControlName="author" placeholder="Enter author name" required />
+
+    <select formControlName="genre" required>
+      <option value="" disabled selected>Select genre</option>
+      <option *ngFor="let genre of genre" [value]="genre">{{ genre }}</option>
+    </select>
+
+    <textarea formControlName="description" rows="4" placeholder="Enter description (optional)"></textarea>
+
+    <div class="button-group">
+      <button type="submit" [disabled]="bookForm.invalid">Add Book</button>
+    </div>
+  </form>
+</div>

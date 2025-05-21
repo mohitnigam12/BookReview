@@ -65,9 +65,11 @@ namespace BooksApi
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
                     IssuerSigningKey = new SymmetricSecurityKey(secretKey),
                     ValidateIssuer = false,
                     ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
                 };
             });
 
@@ -125,6 +127,8 @@ namespace BooksApi
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<IBookService, BookService>();
             builder.Services.AddScoped<IBookRepository, BookRepository>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
 
             // Add logging
             builder.Services.AddLogging(logging =>

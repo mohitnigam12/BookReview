@@ -3,36 +3,38 @@ import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angula
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
+import { trigger, state, style, animate, transition } from '@angular/animations';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, CommonModule],
-  template: `
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <mat-form-field>
-        <mat-label>Username</mat-label>
-        <input matInput formControlName="username" type="text">
-        <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
-          Username is required
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Password</mat-label>
-        <input matInput formControlName="password" type="password">
-        <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-          Password is required
-        </mat-error>
-      </mat-form-field>
-      <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid">Login</button>
-    </form>
-  `
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    CommonModule,
+    RouterLink
+  ],
+  animations: [
+    trigger('fadeIn', [
+      state('void', style({ opacity: 0, transform: 'translateY(20px)' })),
+      transition(':enter', [
+        animate('600ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  hidePassword = true;
 
   constructor(
     private fb: FormBuilder,
@@ -46,26 +48,18 @@ export class LoginComponent {
   }
 
   onSubmit() {
-    console.log('Form submitted', this.loginForm.value, 'Valid:', this.loginForm.valid);
     if (this.loginForm.valid) {
-      const formValue: { username: string; password: string } = this.loginForm.value as {
-        username: string;
-        password: string;
-      };
-      console.log('Sending login request:', formValue);
-      this.authService.login(formValue).subscribe({
-        next: (res) => {
-          console.log('Login successful', res);
-          this.authService.setToken(res.token);
+      this.authService.login(this.loginForm.value).subscribe({
+        next: (response) => {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('lastActivity', Date.now().toString());
           this.router.navigate(['/books']);
         },
         error: (err) => {
           console.error('Login error:', err);
-          alert('Login failed: ' + (err.error?.message || 'Unauthorized'));
+          alert('Login failed: ' + (err.error?.message || 'Server error'));
         }
       });
-    } else {
-      console.log('Form invalid, errors:', this.loginForm.errors);
     }
   }
 }

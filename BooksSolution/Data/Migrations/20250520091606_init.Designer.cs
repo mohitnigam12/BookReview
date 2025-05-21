@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(TestDbContext))]
-    [Migration("20250512131852_init")]
+    [Migration("20250520091606_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -43,9 +43,19 @@ namespace Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<double?>("AverageRating")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Genre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -56,7 +66,43 @@ namespace Data.Migrations
 
                     b.HasIndex("AddedByUserId");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Books");
+                });
+
+            modelBuilder.Entity("Data.Category", b =>
+                {
+                    b.Property<int>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CategoryId");
+
+                    b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoryId = 1,
+                            CategoryName = "Fiction"
+                        },
+                        new
+                        {
+                            CategoryId = 2,
+                            CategoryName = "Science"
+                        },
+                        new
+                        {
+                            CategoryId = 3,
+                            CategoryName = "Biography"
+                        });
                 });
 
             modelBuilder.Entity("Data.Review", b =>
@@ -303,7 +349,14 @@ namespace Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Data.Category", "Category")
+                        .WithMany("Books")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("AddedByUser");
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("Data.Review", b =>
@@ -379,6 +432,11 @@ namespace Data.Migrations
             modelBuilder.Entity("Data.Books", b =>
                 {
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("Data.Category", b =>
+                {
+                    b.Navigation("Books");
                 });
 #pragma warning restore 612, 618
         }

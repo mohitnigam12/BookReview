@@ -1,0 +1,148 @@
+/* Apply gradient background to the entire page */
+:host {
+  display: block;
+  min-height: 100vh;
+  background: white;
+}
+
+/* Form container styling */
+.form-container {
+  max-width: 400px;
+  margin: 50px auto;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Header styling */
+h2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e3a8a; /* Dark blue to match the header */
+  margin-bottom: 24px;
+}
+
+/* Form layout */
+.book-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Form group for each input */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Input, select, and textarea styling */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #333;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Placeholder text color */
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Focus state for inputs */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Style for the dropdown placeholder */
+select.placeholder {
+  color: #94a3b8;
+}
+
+/* Textarea specific styling */
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Invalid input styling */
+input.invalid,
+select.invalid {
+  border-color: #ef4444;
+}
+
+/* Error message styling */
+.error-message {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Button group styling */
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* Button styling */
+button {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+/* Disabled button styling */
+button:disabled {
+  background-color: #e5e7eb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Submit button styling */
+.submit-btn {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* Submit button hover effect */
+.submit-btn:hover:not(:disabled) {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+
+/* Cancel button styling */
+.cancel-btn {
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
+
+/* Cancel button hover effect */
+.cancel-btn:hover {
+  background-color: #415e8b;
+  transform: translateY(-1px);
+}

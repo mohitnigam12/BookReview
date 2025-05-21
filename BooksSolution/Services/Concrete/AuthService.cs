@@ -65,7 +65,7 @@ namespace Services.Concrete
             new Claim(ClaimTypes.Email, user.Email),
 
         }),
-                Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(configuration["Jwt:TokenExpiryInMinutes"])),
+                Expires = DateTime.UtcNow.AddMinutes(60),
                 SigningCredentials = credentials,
                 Issuer = configuration["Jwt:Issuer"],
                 Audience = configuration["Jwt:Audience"]

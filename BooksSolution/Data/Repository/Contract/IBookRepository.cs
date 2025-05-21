@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+
 namespace Data.Repository.Contract
 {
     public interface IBookRepository
@@ -17,5 +19,9 @@ namespace Data.Repository.Contract
         Task DeleteBook(Books book);
         Task<List<Books>> SearchBooks(string query);
         Task<Books?> GetBookById(int id);
+
+        Task<List<Books>> GetBooksByCategory(int categoryId);
+
+        public Task<(List<Books>, int)> GetPaginatedBooks(int pageNumber, int pageSize);
     }
 }

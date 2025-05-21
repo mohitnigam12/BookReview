@@ -1,149 +1,124 @@
-import { Component, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSelectModule } from '@angular/material/select';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { Book } from '../../../models/book.model';
-import { Review } from '../../../models/review.model';
+import { Component, signal, Inject, PLATFORM_ID } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BookService } from '../../../services/book.service';
 import { ReviewService } from '../../../services/review.service';
+import { Book } from '../../../models/book.model';
+import { Review } from '../../../models/review.model';
+import { HttpClientModule } from '@angular/common/http';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-book-details',
   standalone: true,
   imports: [
-    MatCardModule,
+    HttpClientModule,
+    CommonModule,
     MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatPaginatorModule,
-    FormsModule,
-    CommonModule
+    MatCardModule,
+    MatIconModule,
+    RouterLink
   ],
-  template: `
-    <mat-card *ngIf="book()">
-      <mat-card-title>{{ book()!.title }}</mat-card-title>
-      <mat-card-subtitle>By {{ book()!.author }}</mat-card-subtitle>
-      <mat-card-content>
-        <p><strong>Genre:</strong> {{ book()!.genre || 'N/A' }}</p>
-        <p><strong>Average Rating:</strong> {{ book()!.averageRating?.toFixed(1) || 'N/A' }}</p>
-        <p><strong>Description:</strong> {{ book()!.description || 'No description available' }}</p>
-      </mat-card-content>
-    </mat-card>
-
-    <div *ngIf="isAuthenticated()">
-      <mat-form-field>
-        <mat-label>Rating</mat-label>
-        <mat-select (selectionChange)="addRating($event.value)">
-          <mat-option *ngFor="let rating of [1,2,3,4,5]" [value]="rating">{{ rating }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Write a Review</mat-label>
-        <textarea matInput [(ngModel)]="reviewComment"></textarea>
-      </mat-form-field>
-      <button mat-raised-button color="primary" (click)="addReview()">Submit Review</button>
-    </div>
-
-    <h3>Reviews</h3>
-    <mat-card *ngFor="let review of reviews()">
-      <mat-card-content>
-        <p><strong>{{ review.userName }}</strong> ({{ review.createdAt | date }})</p>
-        <p>Rating: {{ review.rating }}</p>
-        <p>{{ review.comment }}</p>
-      </mat-card-content>
-    </mat-card>
-    <mat-paginator
-      [length]="totalReviews()"
-      [pageSize]="pageSize"
-      [pageSizeOptions]="[5, 10, 20]"
-      (page)="onPageChange($event)">
-    </mat-paginator>
-  `,
-  styles: [`
-    mat-card { margin: 20px 0; }
-    mat-form-field { width: 100%; margin-bottom: 20px; }
-  `]
+  templateUrl: './book-details.component.html',
+  styleUrls: ['./book-details.component.scss']
 })
 export class BookDetailsComponent {
   book = signal<Book | null>(null);
   reviews = signal<Review[]>([]);
-  totalReviews = signal<number>(0);
-  pageSize = 5;
-  currentPage = 0;
-  reviewComment = '';
+  error = signal<boolean>(false);
 
   constructor(
-    private route: ActivatedRoute,
     private bookService: BookService,
-    private reviewService: ReviewService
+    private reviewService: ReviewService,
+    private route: ActivatedRoute,
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadBook(id);
-    this.loadReviews(id);
-  }
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const id = idParam ? +idParam : NaN;
+    console.log('BookDetailsComponent: ID from route:', idParam, 'Parsed ID:', id);
+    if (isNaN(id) || id <= 0) {
+      console.error('BookDetailsComponent: Invalid book ID:', idParam);
+      this.error.set(true);
+      this.router.navigate(['/books']);
+      return;
+    }
 
-  isAuthenticated = () => !!localStorage.getItem('token');
-
-  loadBook(id: number) {
+    // Load book details
     this.bookService.getBook(id).subscribe({
-      next: (book) => this.book.set(book)
+      next: (book: Book) => {
+        console.log('BookDetailsComponent: Fetched book:', book);
+        if (!book || !book.id) {
+          console.error('BookDetailsComponent: Invalid book data:', book);
+          this.error.set(true);
+          this.router.navigate(['/books']);
+          return;
+        }
+        this.book.set(book);
+      },
+      error: (err) => {
+        console.error('BookDetailsComponent: Error loading book:', err);
+        this.error.set(true);
+        this.router.navigate(['/books']);
+      }
     });
-  }
 
-  loadReviews(bookId: number) {
-    this.reviewService.getReviews(bookId, this.currentPage + 1, this.pageSize).subscribe({
-      next: (res) => {
-        this.reviews.set(res.reviews);
-        this.totalReviews.set(res.total);
+    // Load reviews
+    this.reviewService.getReviewsByBookId(id).subscribe({
+      next: (reviews: Review[]) => {
+        console.log('BookDetailsComponent: Setting reviews:', reviews);
+        this.reviews.set(reviews);
+      },
+      error: (err) => {
+        console.error('BookDetailsComponent: Error loading reviews:', err);
+        this.reviews.set([]);
       }
     });
   }
 
-  addRating(rating: number) {
-    const book = this.book();
-    if (!book || book.id === undefined) {
-      alert('Book not loaded');
-      return;
+  isAuthenticated = () => {
+    if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem('token');
+      console.log('BookDetailsComponent: Checking authentication, token exists:', !!token);
+      return !!token;
     }
-    const bookId = book.id;
-    this.reviewService.addRating(bookId, rating).subscribe({
-      next: () => this.loadBook(bookId),
-      error: () => alert('Failed to add rating')
+    return false;
+  };
+
+  navigateToUpdate(bookId: number) {
+    console.log('BookDetailsComponent: Navigating to update for book ID:', bookId);
+    this.router.navigate(['/books', bookId, 'updateBook']).catch(err => {
+      console.error('BookDetailsComponent: Navigation error:', err);
     });
   }
 
-  addReview() {
-    if (!this.reviewComment.trim()) return;
+  onDeleteBook(): void {
     const book = this.book();
-    if (!book || book.id === undefined) {
-      alert('Book not loaded');
+    console.log('BookDetailsComponent: Attempting to delete book:', book);
+    if (!book || !book.id) {
+      console.error('BookDetailsComponent: No book or invalid book ID');
+      this.error.set(true);
       return;
     }
-    const bookId = book.id;
-    this.reviewService.addReview({ bookId, comment: this.reviewComment }).subscribe({
-      next: () => {
-        this.reviewComment = '';
-        this.loadReviews(bookId);
-      },
-      error: () => alert('Failed to add review')
-    });
-  }
+    if (!this.isAuthenticated()) {
+      console.error('BookDetailsComponent: User not logged in, redirecting to login');
+      this.router.navigate(['/login']);
+      return;
+    }
 
-  onPageChange(event: PageEvent) {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    const book = this.book();
-    if (!book || book.id === undefined) {
-      alert('Book not loaded');
-      return;
+    if (confirm('Are you sure you want to delete this book?')) {
+      this.bookService.deleteBook(book.id).subscribe({
+        next: () => {
+          console.log(`BookDetailsComponent: Book with ID ${book.id} deleted successfully`);
+          this.router.navigate(['/books']);
+        },
+        error: (err) => {
+          console.error('BookDetailsComponent: Error deleting book:', err);
+          this.error.set(true);
+        }
+      });
     }
-    this.loadReviews(book.id);
   }
 }

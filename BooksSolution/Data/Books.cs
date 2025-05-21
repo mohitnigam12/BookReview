@@ -17,9 +17,16 @@ namespace Data
        
         public string Author { get; set; }
 
+        public string Genre { get; set; }
+
         public string? Description { get; set; }
 
         public string AddedByUserId { get; set; }
+
+        public double? AverageRating { get; set; }
+
+        public int? CategoryId { get; set; }
+        public Category? Category { get; set; }
 
         public User AddedByUser { get; set; }
 

@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Data;
+using Data.Dto;
+using Data.Repository.Concrete;
 using Data.Repository.Contract;
 using Models.Dto;
 using Services.Contract;
@@ -37,6 +39,8 @@ namespace Services.Concrete
 
             return mapper.Map<BookDto>(book);
         }
+
+
 
         public async Task<bool> Delete(int id)
         {
@@ -78,6 +82,19 @@ namespace Services.Concrete
             mapper.Map(dto, book);
             await bookRepo.UpdateBook(book);
             return true;
+        }
+
+        public async Task<PagedResponse<BookDto>> GetPaginatedBooks(PaginationDto paginationDto)
+        {
+            var (books, totalItems) = await bookRepo.GetPaginatedBooks(paginationDto.PageNumber, paginationDto.PageSize);
+            var bookDtos = mapper.Map<List<BookDto>>(books);
+
+            return new PagedResponse<BookDto>(bookDtos, totalItems, paginationDto.PageNumber, paginationDto.PageSize);
+        }
+
+        public async Task<List<Books>> GetBooksByCategory(int categoryId)
+        {
+            return await bookRepo.GetBooksByCategory(categoryId);
         }
     }
 }

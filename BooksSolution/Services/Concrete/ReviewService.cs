@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Data;
 using Data.Repository.Contract;
 using Models.Dto;
 using Services.Contract;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Services.Concrete
 {
@@ -26,14 +25,14 @@ namespace Services.Concrete
             this.mapper = mapper;
         }
 
-
         public async Task AddReview(int bookId, CreateReviewDto dto, string userId)
         {
             var book = await bookRepo.GetBookById(bookId);
+            if (book == null)
+                throw new Exception("Book not found.");
 
             if (await reviewRepo.HasUserReviewed(userId, bookId))
                 throw new Exception("You already reviewed this book.");
-
 
             var review = mapper.Map<Review>(dto);
             review.BookId = bookId;
@@ -52,7 +51,11 @@ namespace Services.Concrete
         {
             var reviews = await reviewRepo.GetReviewsForBook(bookId);
             return mapper.Map<List<ReviewDto>>(reviews);
+        }
 
+        public async Task<bool> HasUserReviewed(string userId, int bookId)
+        {
+            return await reviewRepo.HasUserReviewed(userId, bookId);
         }
     }
 }

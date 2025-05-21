@@ -1,0 +1,52 @@
+<div *ngIf="book() as book; else loadingOrError" class="container">
+  <div class="book-card-container">
+    <mat-card class="book-card">
+      <mat-card-header>
+        <mat-card-title>{{ book.title }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-icon>person</mat-icon> {{ book.author }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p><mat-icon>category</mat-icon> <strong>Genre:</strong> {{ book.genre || 'N/A' }}</p>
+        <p><mat-icon>description</mat-icon> <strong>Description:</strong> {{ book.description || 'N/A' }}</p>
+        <p><mat-icon>star_rate</mat-icon> <strong>Average Rating:</strong> {{ book.averageRating != null ? book.averageRating.toFixed(1) : 'N/A' }}</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" [routerLink]="['/books']">
+          <mat-icon>arrow_back</mat-icon> Back to List
+        </button>
+        <button *ngIf="isAuthenticated()" mat-raised-button color="accent" (click)="navigateToUpdate(book.id)">Update</button>
+        <button *ngIf="isAuthenticated()" mat-raised-button color="warn" (click)="onDeleteBook()">Delete</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+         
+
+  <h3>Reviews</h3>
+  <div *ngIf="reviews().length > 0; else noReviews" class="reviews-list">
+    <mat-card *ngFor="let review of reviews()" class="review-card">
+      <mat-card-content>
+        <p><mat-icon color="warn">star</mat-icon> <strong>Rating:</strong> {{ review.rating }}/5</p>
+        <p><mat-icon>comment</mat-icon> <strong>Comment:</strong> {{ review.comment || 'No comment' }}</p>
+        <p><mat-icon>account_circle</mat-icon> <strong>Posted by:</strong> {{ review.username || 'Anonymous' }}</p>
+        <p><mat-icon>event</mat-icon> <strong>Date:</strong> {{ review.createdAt | date:'medium' }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <ng-template #noReviews>
+    <p class="no-reviews">No reviews yet. Be the first to add one!</p>
+  </ng-template>
+</div>
+
+<ng-template #loadingOrError>
+  <div *ngIf="error()" class="error-container">
+    <p><mat-icon color="warn">error</mat-icon> Error: Invalid book ID or book not found.</p>
+    <button mat-raised-button color="primary" [routerLink]="['/books']">
+      <mat-icon>arrow_back</mat-icon> Back to List
+    </button>
+  </div>
+  <div *ngIf="!error()" class="loading">Loading...</div>
+</ng-template>

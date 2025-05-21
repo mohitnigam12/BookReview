@@ -17,6 +17,8 @@ namespace Data.Repository.Concrete
             this.context = context;
         }
 
+
+
         public async Task AddBook(Books book)
         {
             context.Books.Add(book);
@@ -31,12 +33,35 @@ namespace Data.Repository.Concrete
 
         public async Task<List<Books>> GetAllBooks()
         {
-            return await context.Books.ToListAsync();
+            return await context.Books
+                .Select(b => new Books
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Author = b.Author,
+                    Genre = b.Genre,
+                    AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : (double?)null
+                })
+                .ToListAsync();
         }
 
         public async Task<Books?> GetBookById(int id)
         {
             return await context.Books.FirstOrDefaultAsync(b => b.Id == id);
+        }
+
+        public async Task<List<Books>> GetBooksByCategory(int id)
+        {
+            return await context.Books
+            .Where(b => b.CategoryId == id)
+            .ToListAsync();
+        }
+
+        public async Task<List<Books>> GetBooksByGenre(string genre)
+        {
+            return await context.Books
+                         .Where(g => g.Genre == genre)
+                         .ToListAsync();
         }
 
         public async Task<Books?> GetById(int id)
@@ -57,6 +82,19 @@ namespace Data.Repository.Concrete
         {
             context.Books.Update(book);
             await context.SaveChangesAsync();
+        }
+
+        public async Task<(List<Books>, int)> GetPaginatedBooks(int pageNumber, int pageSize)
+        {
+            var query = context.Books.Include(b => b.AddedByUser).AsQueryable();
+
+            int totalItems = await query.CountAsync();
+            var books = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (books, totalItems);
         }
     }
     }
