@@ -23,6 +23,23 @@ namespace Data.Repository.Concrete
             await context.SaveChangesAsync();
         }
 
+        public async Task<Review> GetReviewByIdAsync(int reviewId)
+        {
+            return await context.Reviews.FindAsync(reviewId);
+        }
+
+        public async Task UpdateReviewAsync(Review review)
+        {
+            context.Entry(review).State = EntityState.Modified;
+            await context.SaveChangesAsync();
+        }
+
+        public async Task DeleteReviewAsync(Review review)
+        {
+            context.Reviews.Remove(review);
+            await context.SaveChangesAsync();
+        }
+
         public async Task<double> GetAverageRatingForBook(int bookId)
         {
             var rating = await context.Reviews

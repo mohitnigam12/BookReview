@@ -40,7 +40,14 @@ namespace Services.Concrete
             return mapper.Map<BookDto>(book);
         }
 
-
+        public async Task<List<Books>> GetBooksByUserIdAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentException("User ID cannot be null or empty.", nameof(userId));
+            }
+            return await bookRepo.GetBooksByUserIdAsync(userId);
+        }
 
         public async Task<bool> Delete(int id)
         {

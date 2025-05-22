@@ -87,6 +87,19 @@ export class BookService {
     );
   }
 
+  getBooksByUserId(userId: string): Observable<{ books: Book[], total: number }> {
+    const url = `${this.apiUrl}/user/${encodeURIComponent(userId)}`;
+    console.log(`Fetching books for user at: ${url}`);
+    return this.http.get<Book[]>(url, { headers: this.getAuthHeaders() }).pipe(
+      tap(() => console.log(`Successfully called: ${url}`)),
+      map(books => ({ books: books || [], total: books?.length || 0 })),
+      catchError((err) => {
+        console.error(`Error fetching books for user ${userId}:`, err);
+        return of({ books: [], total: 0 });
+      })
+    );
+  }
+
   // updateBook(id: number, book: Book): Observable<Book> {
   //   console.log('BookService: Updating book with ID:', id, 'Data:', book);
   //   return this.http.put<Book>(`${this.apiUrl}/${id}`, book, { headers: this.getAuthHeaders() }).pipe(

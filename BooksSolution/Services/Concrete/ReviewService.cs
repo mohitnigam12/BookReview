@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Data;
+using Data.Dto;
+using Data.Repository.Concrete;
 using Data.Repository.Contract;
 using Models.Dto;
 using Services.Contract;
@@ -56,6 +58,41 @@ namespace Services.Concrete
         public async Task<bool> HasUserReviewed(string userId, int bookId)
         {
             return await reviewRepo.HasUserReviewed(userId, bookId);
+        }
+
+        public async Task UpdateReviewAsync(int reviewId, UpdateReviewDto updateReviewDto, string currentUserId)
+        {
+            var review = await reviewRepo.GetReviewByIdAsync(reviewId);
+            if (review == null)
+            {
+                throw new KeyNotFoundException("Review not found");
+            }
+
+            if (review.UserId != currentUserId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to update this review");
+            }
+
+            review.Rating = updateReviewDto.Rating;
+            review.Comment = updateReviewDto.Comment;
+
+            await reviewRepo.UpdateReviewAsync(review);
+        }
+
+        public async Task DeleteReviewAsync(int reviewId, string currentUserId)
+        {
+            var review = await reviewRepo.GetReviewByIdAsync(reviewId);
+            if (review == null)
+            {
+                throw new KeyNotFoundException("Review not found");
+            }
+
+            if (review.UserId != currentUserId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to delete this review");
+            }
+
+            await reviewRepo.DeleteReviewAsync(review);
         }
     }
 }

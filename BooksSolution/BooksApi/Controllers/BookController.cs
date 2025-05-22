@@ -5,8 +5,8 @@ using Data.Dto;
 using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
-    using Models.Dto;
-    using Services.Concrete;
+using Models.Dto;
+using Services.Concrete;
     using Services.Contract;
 
     namespace BooksApi.Controllers
@@ -49,6 +49,16 @@ using Microsoft.AspNetCore.Authorization;
         //    var result = await bookService.GetBooks();
         //    return Ok(result);
         //}
+
+        [HttpGet("user/{userId}")]
+        [Authorize]
+        public async Task<ActionResult<List<Books>>> GetBooksByUserId(string userId)
+        {
+            var books = await bookService.GetBooksByUserIdAsync(userId);
+            return Ok(books);
+        }
+
+
 
         [HttpGet("search/{query}")]
         [AllowAnonymous]

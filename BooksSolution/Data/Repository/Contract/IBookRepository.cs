@@ -13,6 +13,7 @@ namespace Data.Repository.Contract
         Task AddBook(Books book);
         Task<List<Books>> GetAllBooks();
 
+        Task<List<Books>> GetBooksByUserIdAsync(string userId);
         Task<Books?> GetById(int id);
 
         Task UpdateBook(Books book);

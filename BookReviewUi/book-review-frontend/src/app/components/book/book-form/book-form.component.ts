@@ -3,7 +3,6 @@ import { FormBuilder, ReactiveFormsModule, Validators, FormGroup, FormControl } 
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-//import { MatOption } from '@angular/material/select';
 import { Router } from '@angular/router';
 import { BookService } from '../../../services/book.service';
 import { Book } from '../../../models/book.model';
@@ -18,7 +17,7 @@ import { CommonModule } from '@angular/common';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-   // MatOption,
+   
     HttpClientModule,
     CommonModule
   ],
@@ -42,7 +41,7 @@ export class BookFormComponent implements OnInit {
     console.log('BookFormComponent constructed');
   }
 
-    genre: string[] = ['Romance', 'Fantasy', 'Science Fiction', 'Paranormal', 'Mystery', 'Horror', 'Thriller/Suspense', 'Action Adventure', 'Historical Fiction','Contemporary Fiction'];
+    genre: string[] = ['Education','Romance', 'Fantasy', 'Science Fiction', 'Paranormal', 'Mystery', 'Horror', 'Thriller/Suspense', 'Action Adventure', 'Historical Fiction','Contemporary Fiction'];
   ngOnInit(): void {
     console.log('BookFormComponent ngOnInit');
     console.log('Initial form state:', this.bookForm.value, 'Valid:', this.bookForm.valid);

@@ -1,19 +1,71 @@
 <div class="form-container">
   <h2>📚 Add a New Book</h2>
-  <form [formGroup]="bookForm" (ngSubmit)="onSubmit()">
-    <input type="text" formControlName="title" placeholder="Enter book title" required />
+  <form [formGroup]="bookForm" (ngSubmit)="onSubmit()" class="book-form">
+    <div class="form-group">
+      <input
+        type="text"
+        formControlName="title"
+        placeholder="Enter book title"
+        required
+        [class.invalid]="bookForm.get('title')?.invalid && bookForm.get('title')?.touched"
+      />
+      <span
+        class="error-message"
+        *ngIf="bookForm.get('title')?.invalid && bookForm.get('title')?.touched"
+      >
+        Title is required
+      </span>
+    </div>
 
-    <input type="text" formControlName="author" placeholder="Enter author name" required />
+    <div class="form-group">
+      <input
+        type="text"
+        formControlName="author"
+        placeholder="Enter author name"
+        required
+        [class.invalid]="bookForm.get('author')?.invalid && bookForm.get('author')?.touched"
+      />
+      <span
+        class="error-message"
+        *ngIf="bookForm.get('author')?.invalid && bookForm.get('author')?.touched"
+      >
+        Author is required
+      </span>
+    </div>
 
-    <select formControlName="genre" required>
-      <option value="" disabled selected>Select genre</option>
-      <option *ngFor="let genre of genre" [value]="genre">{{ genre }}</option>
-    </select>
+    <div class="form-group">
+      <select
+        formControlName="genre"
+        [class.placeholder]="!bookForm.get('genre')?.value"
+      >
+        <option value="" disabled selected>Select genre</option>
+        <option *ngFor="let genre of genre" [value]="genre">{{ genre }}</option>
+      </select>
+    </div>
 
-    <textarea formControlName="description" rows="4" placeholder="Enter description (optional)"></textarea>
+    <div class="form-group">
+      <textarea
+        formControlName="description"
+        placeholder="Enter description (optional)"
+        rows="3"
+      ></textarea>
+    </div>
 
     <div class="button-group">
-      <button type="submit" [disabled]="bookForm.invalid">Add Book</button>
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="bookForm.invalid"
+      >
+        Add Book
+      </button>
+      <button
+        type="button"
+        class="cancel-btn"
+        (click)="navigateToBooks()"
+      >
+        Cancle
+      </button>
     </div>
   </form>
 </div>

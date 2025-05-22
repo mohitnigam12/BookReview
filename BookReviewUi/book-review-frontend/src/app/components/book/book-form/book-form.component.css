@@ -117,20 +117,22 @@ button {
 
 /* Disabled button styling */
 button:disabled {
-  background-color: #e5e7eb;
-  color: #6b7280;
+  background-color: #1e78ff;
+  color: #ffffff;
   cursor: not-allowed;
+  border : 2px solid black;
 }
 
 /* Submit button styling */
 .submit-btn {
-  background-color: #3b82f6;
-  color: white;
+  background-color: #f6f6f6;
+  color: rgb(33, 32, 32);
+  border : 2px solid black;
 }
 
 /* Submit button hover effect */
 .submit-btn:hover:not(:disabled) {
-  background-color: #2563eb;
+  background-color: #4779dc;
   transform: translateY(-1px);
 }
 

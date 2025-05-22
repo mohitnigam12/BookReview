@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Data.Repository.Contract;
 using Microsoft.EntityFrameworkCore;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Data.Repository.Concrete
 {
@@ -42,6 +43,22 @@ namespace Data.Repository.Concrete
                     Genre = b.Genre,
                     AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : (double?)null
                 })
+                .ToListAsync();
+        }
+
+
+        public async Task<List<Books>> GetBooksByUserIdAsync(string userId)
+        {
+            return await context.Books
+                .Where(b => b.AddedByUserId == userId)
+                .Select(b => new Books
+                 {
+                     Id = b.Id,
+                     Title = b.Title,
+                     Author = b.Author,
+                     Genre = b.Genre,
+                     AverageRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : (double?)null
+                 })
                 .ToListAsync();
         }
 

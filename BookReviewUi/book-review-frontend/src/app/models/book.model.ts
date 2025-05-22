@@ -6,6 +6,8 @@ export interface Book {
   genre?: string;
   description?: string;
   averageRating: number | null;
+  addedByUserId?:string;
+
   // categoryId? : number;
   // categoryName?: string;
 }

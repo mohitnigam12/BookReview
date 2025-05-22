@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -7,7 +7,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
-import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
     selector: 'app-register',
@@ -21,37 +20,26 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
         CommonModule,
         RouterLink
     ],
-    animations: [
-        trigger('fadeIn', [
-            state('void', style({ opacity: 0, transform: 'translateY(20px)' })),
-            transition(':enter', [
-                animate('600ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-            ])
-        ])
-    ],
     template: `
     <div class="register-container">
-      <div class="overlay"></div>
-      <div class="register-card" @fadeIn>
-        <div class="image-wrapper">
-          <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80" alt="Books" />
+      <div class="register-card">
+        <div class="heading-wrapper">
+          <img src="https://plus.unsplash.com/premium_photo-1667251758769-398dca4d5f1c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="BookVerse Logo" class="logo" />
+          <h2>Join Books Review</h2>
         </div>
-        <h2 class="card-title">Create Your Account</h2>
-        <p class="card-subtitle">Join BookVerse and share your love for books!</p>
-        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
-          <mat-form-field appearance="outline" class="full-width">
+          <p class="card-subtitle">Register to explore Books Review, share insights, and rate your favorite reads!</p>
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="outline">
             <mat-label>Username</mat-label>
-            <input matInput formControlName="userName" required placeholder="Enter your username">
-            <mat-icon matPrefix>person</mat-icon>
+            <input matInput formControlName="userName" required>
             <mat-error *ngIf="registerForm.get('userName')?.hasError('required')">
               Username is required
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline">
             <mat-label>Email</mat-label>
-            <input matInput formControlName="email" type="email" required placeholder="Enter your email">
-            <mat-icon matPrefix>email</mat-icon>
+            <input matInput formControlName="email" type="email" required>
             <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
               Email is required
             </mat-error>
@@ -60,10 +48,9 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline">
             <mat-label>Password</mat-label>
-            <input matInput formControlName="password" [type]="hidePassword ? 'password' : 'text'" required placeholder="Enter your password">
-            <mat-icon matPrefix>lock</mat-icon>
+            <input matInput formControlName="password" [type]="hidePassword ? 'password' : 'text'" required>
             <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
               <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
@@ -73,159 +60,130 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
             <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
               Password must be at least 6 characters
             </mat-error>
-            <mat-error *ngIf="registerForm.get('password')?.hasError('pattern') && registerForm.get('password')?.touched">
-              Password must contain at least one number and one special character.
+            <mat-error *ngIf="registerForm.get('password')?.hasError('pattern')">
+              Password must contain at least one number and one special character
             </mat-error>
-
           </mat-form-field>
 
-          <button type="submit" class="register-button" [disabled]="registerForm.invalid">
+          <mat-form-field appearance="outline">
+            <mat-label>Confirm Password</mat-label>
+            <input matInput formControlName="confirmPassword" [type]="hideConfirmPassword ? 'password' : 'text'" required>
+            <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button">
+              <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="registerForm.get('confirmPassword')?.hasError('required')">
+              Confirm Password is required
+            </mat-error>
+            <mat-error *ngIf="registerForm.get('confirmPassword')?.hasError('mismatch')">
+              Passwords do not match
+            </mat-error>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="registerForm.invalid">
             Register
           </button>
 
-          <div class="login-link">
-            <p>Already have an account? <a routerLink="/login">Login here</a></p>
-          </div>
+          <p>Already have an account? <a routerLink="/login">Login here</a></p>
         </form>
       </div>
     </div>
   `,
     styles: [`
     .register-container {
-      position: relative;
-      min-height: 100vh;
-      background: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 16px;
+      align-items: center;
+      min-height: 100vh;
+      background: url('https://plus.unsplash.com/premium_photo-1677567996070-68fa4181775a?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center/cover;
+      position: relative;
+       font-family: 'Ancizar Serif', serif;
     }
 
-    .overlay {
+    .register-container::before {
+      content: '';
       position: absolute;
       inset: 0;
-      background-color: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.3);
       z-index: 0;
     }
 
     .register-card {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
       position: relative;
       z-index: 1;
-      max-width: 420px;
-      width: 100%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 16px;
-      padding: 32px 24px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      color: #fff;
     }
 
-    .image-wrapper img {
+    .heading-wrapper {
+      text-align: center;   
+      margin-bottom: 16px;
+    }
+
+    .logo {
       width: 60px;
       height: 60px;
-      border-radius: 8px;
-      display: block;
-      margin: 0 auto 12px auto;
+      border-radius: 50%;
+      border: 2px solid rgba(224, 29, 29, 0.84);
+      box-shadow: 0 2px 8px rgba(209, 160, 160, 0.15);
+      margin-bottom: 8px;
     }
 
-    .card-title {
-      font-size: 1.8rem;
-      font-weight: 600;
+    h2 {
       text-align: center;
-      margin-bottom: 6px;
+      margin-bottom: 16px;
+      font-size: 1.8rem;
+      color: #333;
+       font-family: 'Ancizar Serif', serif;
     }
 
     .card-subtitle {
-      font-size: 0.95rem;
+      font-size: 1rem;
       text-align: center;
-      margin-bottom: 24px;
-      color: #ddd;
+      margin-bottom: 16px;
+      color: #666;
+       font-family: 'Ancizar Serif', serif;
     }
 
-    .register-form {
+
+    form {
       display: flex;
       flex-direction: column;
-      gap: 18px;
-    }
-
-    .full-width {
-      width: 100%;
+      gap: 16px;
     }
 
     mat-form-field {
-      margin-bottom:10px;
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
+      width: 100%;
     }
 
-    input {
-      color: #fff !important;
-    }
-
-    mat-label, mat-icon {
-      color: #ccc !important;
-    }
-
-    mat-error {
-      font-size: 0.8rem;
-      color:rgb(233, 196, 224);
-    }
-
-    .register-button {
-      background: linear-gradient(to right, #00c6ff, #0072ff);
-      color: white;
-      margin:10px;
+    button {
       padding: 12px;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-      transition: all 0.3s ease;
+      font-size: 16px;
     }
 
-    .register-button:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-    }
-
-    .register-button:disabled {
-      background-color: #999999;
-      cursor: not-allowed;
-    }
-
-    .login-link {
+    p {
       text-align: center;
       margin-top: 16px;
-      font-size: 0.9rem;
+       font-family: 'Ancizar Serif', serif;
     }
 
-    .login-link a {
-      color: #00c6ff;
+    a {
+      color: #3b82f6;
       text-decoration: none;
-      font-weight: 500;
     }
 
-    .login-link a:hover {
+    a:hover {
       text-decoration: underline;
-    }
-
-    @media (max-width: 576px) {
-      .register-card {
-        padding: 24px 16px;
-      }
-
-      .card-title {
-        font-size: 1.5rem;
-      }
     }
   `]
 })
 export class RegisterComponent {
     registerForm: FormGroup;
     hidePassword = true;
+    hideConfirmPassword = true;
 
     constructor(
         private fb: FormBuilder,
@@ -235,8 +193,18 @@ export class RegisterComponent {
         this.registerForm = this.fb.group({
             userName: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
-            password: ['', [Validators.required, Validators.minLength(6), Validators.pattern(/^(?=.*[0-9])(?=.*[!@#$%^&*()_+[\]{};':"\\|,.<>/?-]).*$/)]]
-        });
+            password: ['', [
+                Validators.required,
+                Validators.pattern(/^(?=.*[0-9])(?=.*[!@#$%^&*()_+[\]{};':"\\|,.<>/?-]).*$/)
+            ]],
+            confirmPassword: ['', Validators.required]
+        }, { validators: this.passwordMatchValidator });
+    }
+
+    passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+        const password = control.get('password')?.value;
+        const confirmPassword = control.get('confirmPassword')?.value;
+        return password === confirmPassword ? null : { mismatch: true };
     }
 
     onSubmit() {

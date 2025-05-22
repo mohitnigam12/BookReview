@@ -4,20 +4,20 @@
       <mat-card-header>
         <mat-card-title>{{ book.title }}</mat-card-title>
         <mat-card-subtitle>
-          <mat-icon>person</mat-icon> {{ book.author }}
+          <b>Author</b> : {{ book.author }}
         </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <p><mat-icon>category</mat-icon> <strong>Genre:</strong> {{ book.genre || 'N/A' }}</p>
         <p><mat-icon>description</mat-icon> <strong>Description:</strong> {{ book.description || 'N/A' }}</p>
-        <p><mat-icon>star_rate</mat-icon> <strong>Average Rating:</strong> {{ book.averageRating != null ? book.averageRating.toFixed(1) : 'N/A' }}</p>
+        <!-- <p><mat-icon>star_rate</mat-icon> <strong>Average Rating:</strong> {{ book.averageRating != null ? book.averageRating.toFixed(1) : 'N/A' }}</p> -->
       </mat-card-content>
       <mat-card-actions>
         <button mat-raised-button color="primary" [routerLink]="['/books']">
           <mat-icon>arrow_back</mat-icon> Back to List
         </button>
-        <button *ngIf="isAuthenticated()" mat-raised-button color="accent" (click)="navigateToUpdate(book.id)">Update</button>
-        <button *ngIf="isAuthenticated()" mat-raised-button color="warn" (click)="onDeleteBook()">Delete</button>
+        <!-- <button *ngIf="isAuthenticated()" mat-raised-button color="accent" (click)="navigateToUpdate(book.id)">Update</button>
+        <button *ngIf="isAuthenticated()" mat-raised-button color="warn" (click)="onDeleteBook()">Delete</button> -->
       </mat-card-actions>
     </mat-card>
   </div>

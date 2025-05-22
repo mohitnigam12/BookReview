@@ -15,6 +15,8 @@ namespace Services.Contract
 
         public Task<PagedResponse<BookDto>> GetPaginatedBooks(PaginationDto paginationDto);
         Task<List<BookDto>> GetAllBooks();
+
+        Task<List<Books>> GetBooksByUserIdAsync(string userId);
         Task<List<BookDto>> SearchBooks(string query);
         Task<BookDto?> GetBookById(int id);
 

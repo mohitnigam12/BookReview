@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Data.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Dto;
+using Services.Concrete;
 using Services.Contract;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -16,6 +18,11 @@ namespace BooksApi.Controllers
         public ReviewController(IReviewService reviewService)
         {
             this.reviewService = reviewService;
+        }
+
+        private string GetUserId()
+        {
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
 
         [HttpGet]
@@ -60,6 +67,50 @@ namespace BooksApi.Controllers
 
             var hasReviewed = await reviewService.HasUserReviewed(userId, bookId);
             return Ok(new { hasReviewed });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateReview(int id, UpdateReviewDto updateReviewDto)
+        {
+            try
+            {
+                await reviewService.UpdateReviewAsync(id, updateReviewDto, GetUserId());
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating the review", details = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteReview(int id)
+        {
+            try
+            {
+                await reviewService.DeleteReviewAsync(id, GetUserId());
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while deleting the review", details = ex.Message });
+            }
         }
     }
 }
