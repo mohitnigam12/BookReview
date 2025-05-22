@@ -40,13 +40,13 @@ namespace Services.Concrete
             return mapper.Map<BookDto>(book);
         }
 
-        public async Task<List<Books>> GetBooksByUserIdAsync(string userId)
+        public async Task<List<Books>> GetBooksByUserId(string userId)
         {
             if (string.IsNullOrEmpty(userId))
             {
                 throw new ArgumentException("User ID cannot be null or empty.", nameof(userId));
             }
-            return await bookRepo.GetBooksByUserIdAsync(userId);
+            return await bookRepo.GetBooksByUserId(userId);
         }
 
         public async Task<bool> Delete(int id)
@@ -99,9 +99,6 @@ namespace Services.Concrete
             return new PagedResponse<BookDto>(bookDtos, totalItems, paginationDto.PageNumber, paginationDto.PageSize);
         }
 
-        public async Task<List<Books>> GetBooksByCategory(int categoryId)
-        {
-            return await bookRepo.GetBooksByCategory(categoryId);
-        }
+       
     }
 }

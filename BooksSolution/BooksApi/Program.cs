@@ -26,7 +26,7 @@ namespace BooksApi
             {
                 options.AddPolicy("AllowAngularApp", policy =>
                 {
-                    policy.AllowAnyOrigin() // Temporary for debugging
+                    policy.AllowAnyOrigin() 
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
@@ -127,10 +127,9 @@ namespace BooksApi
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<IBookService, BookService>();
             builder.Services.AddScoped<IBookRepository, BookRepository>();
-            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            
 
-            // Add logging
+   
             builder.Services.AddLogging(logging =>
             {
                 logging.AddConsole();
@@ -139,14 +138,14 @@ namespace BooksApi
 
             var app = builder.Build();
 
-            // Middleware Pipeline
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-            // Comment out HTTPS redirection for debugging
+            
             // app.UseHttpsRedirection();
             app.UseCors("AllowAngularApp");
             app.UseAuthentication();

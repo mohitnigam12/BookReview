@@ -29,10 +29,7 @@ namespace Data.Configurations
                    .WithOne(r => r.Book)
                    .HasForeignKey(r => r.BookId);
 
-            builder.HasOne(b => b.Category)
-       .WithMany(c => c.Books)
-       .HasForeignKey(b => b.CategoryId)
-       .OnDelete(DeleteBehavior.Restrict);
+         
 
             builder.Property(b => b.AddedByUserId)
               .IsRequired()

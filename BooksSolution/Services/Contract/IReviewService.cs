@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Data;
 using Data.Dto;
 using Models.Dto;
 
@@ -15,6 +16,8 @@ namespace Services.Contract
         Task DeleteReviewAsync(int reviewId, string currentUserId);
         Task<double> GetAverageRating(int bookId);
         Task<List<ReviewDto>> GetReviewsForBook(int bookId);
-        Task<bool> HasUserReviewed(string userId, int bookId); 
+        Task<bool> HasUserReviewed(string userId, int bookId);
+
+        Task<List<Review>> GetReviewsByUserIdAsync(string userId);
     }
 }

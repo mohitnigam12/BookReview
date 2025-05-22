@@ -47,7 +47,7 @@ namespace Data.Repository.Concrete
         }
 
 
-        public async Task<List<Books>> GetBooksByUserIdAsync(string userId)
+        public async Task<List<Books>> GetBooksByUserId(string userId)
         {
             return await context.Books
                 .Where(b => b.AddedByUserId == userId)
@@ -67,12 +67,7 @@ namespace Data.Repository.Concrete
             return await context.Books.FirstOrDefaultAsync(b => b.Id == id);
         }
 
-        public async Task<List<Books>> GetBooksByCategory(int id)
-        {
-            return await context.Books
-            .Where(b => b.CategoryId == id)
-            .ToListAsync();
-        }
+       
 
         public async Task<List<Books>> GetBooksByGenre(string genre)
         {

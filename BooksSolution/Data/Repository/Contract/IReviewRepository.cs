@@ -10,11 +10,13 @@ namespace Data.Repository.Contract
     {
         Task AddReview(Review review);
 
-        Task<Review> GetReviewByIdAsync(int reviewId);
-        Task UpdateReviewAsync(Review review);
-        Task DeleteReviewAsync(Review review);
+        Task<Review> GetReviewById(int reviewId);
+        Task UpdateReview(Review review);
+        Task DeleteReview(Review review);
         Task<List<Review>> GetReviewsForBook(int bookId);
         Task<double> GetAverageRatingForBook(int bookId);
         Task<bool> HasUserReviewed(string userId, int bookId);
+
+        Task<List<Review>> GetReviewsByUserId(string userId);
     }
 }

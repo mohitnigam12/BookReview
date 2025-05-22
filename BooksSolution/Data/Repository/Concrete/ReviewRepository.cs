@@ -23,18 +23,18 @@ namespace Data.Repository.Concrete
             await context.SaveChangesAsync();
         }
 
-        public async Task<Review> GetReviewByIdAsync(int reviewId)
+        public async Task<Review> GetReviewById(int reviewId)
         {
             return await context.Reviews.FindAsync(reviewId);
         }
 
-        public async Task UpdateReviewAsync(Review review)
+        public async Task UpdateReview(Review review)
         {
             context.Entry(review).State = EntityState.Modified;
             await context.SaveChangesAsync();
         }
 
-        public async Task DeleteReviewAsync(Review review)
+        public async Task DeleteReview(Review review)
         {
             context.Reviews.Remove(review);
             await context.SaveChangesAsync();
@@ -46,6 +46,15 @@ namespace Data.Repository.Concrete
                                 .Where(r => r.BookId == bookId)
                                 .AverageAsync(r => (double?)r.Rating) ?? 0.0;
             return rating;
+        }
+
+        public async Task<List<Review>> GetReviewsByUserId(string userId)
+        {
+            return await context.Reviews
+                .Where(r => r.UserId == userId)
+                .Include(r => r.Book) // Include book details
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
         }
 
         public async Task<List<Review>> GetReviewsForBook(int bookId)

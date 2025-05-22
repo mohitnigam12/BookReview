@@ -23,10 +23,7 @@ namespace Data
 
             modelBuilder.ApplyConfiguration(new BookConfiguration());
             modelBuilder.ApplyConfiguration(new ReviewConfiguration());
-            modelBuilder.Entity<Category>().HasData(
-            new Category { CategoryId = 1, CategoryName = "Fiction" },
-            new Category { CategoryId = 2, CategoryName = "Science" },
-            new Category { CategoryId = 3, CategoryName = "Biography" });
+            
 
 
         }
@@ -35,7 +32,5 @@ namespace Data
 public DbSet<User> Users { get; set; }
         public DbSet<Books> Books { get; set; }
         public DbSet<Review> Reviews { get; set; }
-
-        public DbSet<Category> Categories { get; set; }
     }
 }

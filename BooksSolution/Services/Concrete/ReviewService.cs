@@ -62,7 +62,7 @@ namespace Services.Concrete
 
         public async Task UpdateReviewAsync(int reviewId, UpdateReviewDto updateReviewDto, string currentUserId)
         {
-            var review = await reviewRepo.GetReviewByIdAsync(reviewId);
+            var review = await reviewRepo.GetReviewById(reviewId);
             if (review == null)
             {
                 throw new KeyNotFoundException("Review not found");
@@ -76,12 +76,12 @@ namespace Services.Concrete
             review.Rating = updateReviewDto.Rating;
             review.Comment = updateReviewDto.Comment;
 
-            await reviewRepo.UpdateReviewAsync(review);
+            await reviewRepo.UpdateReview(review);
         }
 
         public async Task DeleteReviewAsync(int reviewId, string currentUserId)
         {
-            var review = await reviewRepo.GetReviewByIdAsync(reviewId);
+            var review = await reviewRepo.GetReviewById(reviewId);
             if (review == null)
             {
                 throw new KeyNotFoundException("Review not found");
@@ -92,7 +92,12 @@ namespace Services.Concrete
                 throw new UnauthorizedAccessException("You are not authorized to delete this review");
             }
 
-            await reviewRepo.DeleteReviewAsync(review);
+            await reviewRepo.DeleteReview(review);
+        }
+
+        public async Task<List<Review>> GetReviewsByUserIdAsync(string userId)
+        {
+            return await reviewRepo.GetReviewsByUserId(userId);
         }
     }
 }

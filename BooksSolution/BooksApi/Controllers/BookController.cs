@@ -35,13 +35,7 @@ using Services.Concrete;
             return Ok(books);
         }
 
-        [HttpGet("category  ")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetBooksByCategory([FromQuery] int categoryId)
-        {
-            var books = await bookService.GetBooksByCategory(categoryId);
-            return Ok(books);
-        }
+       
         //[HttpGet]
         //[AllowAnonymous]
         //public async Task<IActionResult> GetBooks()
@@ -54,7 +48,7 @@ using Services.Concrete;
         [Authorize]
         public async Task<ActionResult<List<Books>>> GetBooksByUserId(string userId)
         {
-            var books = await bookService.GetBooksByUserIdAsync(userId);
+            var books = await bookService.GetBooksByUserId(userId);
             return Ok(books);
         }
 

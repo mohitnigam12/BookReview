@@ -18,10 +18,10 @@ namespace Data.Repository.Concrete
 
         public async Task<bool> CreateUser(User user, string password)
         {
-            // Hash the password
+            // Hashing password
             user.PasswordHash = passwordHasher.HashPassword(user, password);
 
-            // Manually normalize email and username
+            // Manually have to normalize email and username
             user.NormalizedEmail = user.Email?.ToUpperInvariant();
             user.NormalizedUserName = user.UserName?.ToUpperInvariant();
 

@@ -1,0 +1,25 @@
+
+    <h2>{{ isEditing ? 'Edit Review' : 'Add Review' }}</h2>
+    <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
+      <mat-form-field>
+        <mat-label>Rating</mat-label>
+        <mat-select formControlName="rating" required>
+          <mat-option *ngFor="let rating of [1, 2, 3, 4, 5]" [value]="rating">{{ rating }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="reviewForm.get('rating')?.hasError('required')">Rating is required</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Comment</mat-label>
+        <textarea matInput formControlName="comment" required></textarea>
+        <mat-error *ngIf="reviewForm.get('comment')?.hasError('required')">Comment is required</mat-error>
+      </mat-form-field>
+      <div class="form-actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="reviewForm.invalid">
+          {{ isEditing ? 'Update Review' : 'Submit Review' }}
+        </button>
+        <button *ngIf="isEditing" mat-raised-button color="warn" (click)="deleteReview()" class="delete-button">
+          Delete Review
+        </button>
+      </div>
+    </form>
+ 

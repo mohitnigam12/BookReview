@@ -1,0 +1,7 @@
+
+    form { display: flex; flex-direction: column; gap: 16px; max-width: 400px; margin: 0 auto; }
+    h2 { text-align: center; }
+    mat-error { color: red; font-size: 12px; }
+    .form-actions { display: flex; gap: 10px; justify-content: center; }
+    .delete-button { margin-left: 10px; }
+  

@@ -1,0 +1,28 @@
+
+    <mat-toolbar color="primary">
+      <span class="app-title">📚 Book Review App</span>
+      <span class="spacer"></span>
+      <button mat-button routerLink="/books" class="nav-button books-button">
+        <mat-icon class="nav-icon">menu_book</mat-icon>
+        Books
+      </button>
+      <ng-container *ngIf="authService.isAuthenticated(); else notLoggedIn">
+        <span class="nav-button logged-in-indicator">
+          <mat-icon class="nav-icon">check_circle_outline</mat-icon>
+           Welcome Back {{ username || 'Logged In' }} 
+        </span>
+        <button mat-button (click)="logout()" class="nav-button logout-button">
+          <mat-icon class="nav-icon">exit_to_app</mat-icon> Logout
+        </button>
+      </ng-container>
+      <ng-template #notLoggedIn>
+        <button mat-button routerLink="/login" class="nav-button login-button">
+          Login
+        </button>
+        <button mat-button routerLink="/register" class="nav-button login-button">
+          Register
+        </button>
+      </ng-template>
+    </mat-toolbar>
+    <router-outlet></router-outlet>
+  
